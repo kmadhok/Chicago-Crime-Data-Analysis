@@ -1,0 +1,46 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+2022/11/29
+final project 
+Zoey Chen
+
+Initialize libraries
+```{r, echo=FALSE}
+library(RMySQL);
+```
+
+Set up the connection
+```{r, echo=FALSE}
+connection = dbConnect(MySQL(),user="root", password="root", 
+                       dbname="FP", host="localhost");
+```
+
+```{r}
+Query3 <- "SELECT 
+    *
+FROM
+    crime;"
+data <- dbGetQuery(connection, Query3)
+data$latitude <- as.numeric(as.character(data$latitude))
+data$longitude <- as.numeric(as.character(data$longitude))
+```
+
+```{r}
+
+library(leaflet)
+
+tag <- function (id, date, block) {
+  paste(sep = "<br />", paste("<b>Crime ID:", id, "</b>"), paste("Date:", date), paste("Block:", block))
+}
+
+chi_map <- leaflet(data) %>%
+  addTiles() %>%
+  setView(lat=41.29, lng=-87.61, zoom=11) %>%
+  addCircleMarkers(lat=~latitude, lng=~longitude, clusterOptions = markerClusterOptions(), labelOptions=labelOptions(), popup=~tag(crime_id, crime_date, crime_block), radius = 8, stroke = TRUE, fillOpacity = 0.8, opacity = 0.8)
+
+chi_map
+```
+
